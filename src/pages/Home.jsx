@@ -158,34 +158,58 @@ function Home() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
-        <div className="text-center mb-8">
-          <h3 className="text-2xl md:text-3xl font-extrabold text-gray-800 mb-2">
-            📋 كيف تحجز موعد؟
-          </h3>
-          <p className="text-gray-500">أربع خطوات بسيطة وتحصل على موعدك</p>
-        </div>
+     {/* خطوات الحجز */}
+<div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+  <div className="text-center mb-8">
+    <h3 className="text-2xl md:text-3xl font-extrabold text-gray-800 mb-2">
+      📋 كيف تحجز موعد؟
+    </h3>
+    <p className="text-gray-500">أربع خطوات بسيطة وتحصل على موعدك</p>
+  </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {['اختر اليوم', 'اختر الوقت', 'أدخل بياناتك', 'تأكيد الحجز'].map((step, i) => {
-            const colors = ['blue', 'green', 'purple', 'orange']
-            return (
-              <div key={i} className={`text-center p-6 bg-gradient-to-b from-${colors[i]}-50 to-white rounded-2xl border border-${colors[i]}-100 hover:shadow-lg transition-all duration-300`}>
-                <div className={`bg-gradient-to-br from-${colors[i]}-600 to-${colors[i]}-700 text-white w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-extrabold mx-auto mb-4 shadow-lg`}>
-                  {i + 1}
-                </div>
-                <h4 className="font-bold text-lg text-gray-800 mb-2">{step}</h4>
-                <p className="text-gray-600 text-sm">
-                  {['تصفح الأيام المتاحة واختر ما يناسبك من التقويم', 'اختر من بين الأوقات المتاحة للدكتور', 'أكمل نموذج الحجز بمعلوماتك الشخصية', 'اضغط تأكيد ويتم حجز موعدك فوراً'][i]}
-                </p>
-              </div>
-            )
-          })}
-        </div>
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    
+    {/* الخطوة ١ */}
+    <div className="text-center p-6 bg-gradient-to-b from-blue-50 to-white rounded-2xl border border-blue-100 hover:shadow-lg transition-all duration-300">
+      <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-extrabold mx-auto mb-4 shadow-lg">
+        1
       </div>
+      <h4 className="font-bold text-lg text-gray-800 mb-2">اختر اليوم</h4>
+      <p className="text-gray-600 text-sm">تصفح الأيام المتاحة واختر ما يناسبك من التقويم</p>
+    </div>
+
+    {/* الخطوة ٢ */}
+    <div className="text-center p-6 bg-gradient-to-b from-green-50 to-white rounded-2xl border border-green-100 hover:shadow-lg transition-all duration-300">
+      <div className="bg-gradient-to-br from-green-600 to-green-700 text-white w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-extrabold mx-auto mb-4 shadow-lg">
+        2
+      </div>
+      <h4 className="font-bold text-lg text-gray-800 mb-2">اختر الوقت</h4>
+      <p className="text-gray-600 text-sm">اختر من بين الأوقات المتاحة للدكتور</p>
+    </div>
+
+    {/* الخطوة ٣ */}
+    <div className="text-center p-6 bg-gradient-to-b from-purple-50 to-white rounded-2xl border border-purple-100 hover:shadow-lg transition-all duration-300">
+      <div className="bg-gradient-to-br from-purple-600 to-purple-700 text-white w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-extrabold mx-auto mb-4 shadow-lg">
+        3
+      </div>
+      <h4 className="font-bold text-lg text-gray-800 mb-2">أدخل بياناتك</h4>
+      <p className="text-gray-600 text-sm">أكمل نموذج الحجز بمعلوماتك الشخصية</p>
+    </div>
+
+    {/* الخطوة ٤ */}
+    <div className="text-center p-6 bg-gradient-to-b from-orange-50 to-white rounded-2xl border border-orange-100 hover:shadow-lg transition-all duration-300">
+      <div className="bg-gradient-to-br from-orange-600 to-orange-700 text-white w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-extrabold mx-auto mb-4 shadow-lg">
+        4
+      </div>
+      <h4 className="font-bold text-lg text-gray-800 mb-2">تأكيد الحجز</h4>
+      <p className="text-gray-600 text-sm">اضغط تأكيد ويتم حجز موعدك فوراً</p>
+    </div>
+
+  </div>
+</div>
 
       <div className="text-center mt-8 text-gray-500 text-sm pb-4">
-        <p>© ٢٠٢٤ عيادتي - جميع الحقوق محفوظة</p>
+        <p>© 2026 عيادتي - جميع الحقوق محفوظة</p>
       </div>
     </div>
   )
