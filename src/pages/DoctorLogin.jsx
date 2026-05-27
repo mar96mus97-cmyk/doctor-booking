@@ -63,7 +63,6 @@ function DoctorLogin() {
         </form>
 
         <div className="mt-6 text-center text-gray-400 text-sm">
-          <p>الرمز الافتراضي: 1234</p>
         </div>
       </div>
     </div>

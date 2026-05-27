@@ -3,7 +3,7 @@ import { createContext, useContext, useState } from 'react'
 const UserContext = createContext()
 
 // الرمز السري للدكتور (تقدر تغيره)
-const DOCTOR_PIN = '1234'
+const DOCTOR_PIN = '4321'
 
 export function UserProvider({ children }) {
   const [userRole, setUserRole] = useState('patient') // 'patient' أو 'doctor'
