@@ -101,12 +101,7 @@ function Home() {
             >
               📅 احجز موعدك الآن
             </Link>
-            <Link 
-              to="/dashboard" 
-              className="inline-block bg-transparent border-2 border-white text-white px-8 py-4 rounded-xl text-lg font-bold hover:bg-white hover:text-blue-700 transition-all duration-300"
-            >
-              📊 لوحة التحكم
-            </Link>
+           
           </div>
         </div>
       </div>

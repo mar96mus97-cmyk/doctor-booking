@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react'
 import { format, parseISO } from 'date-fns'
+import { useUser } from '../context/UserContext'
 
 function Dashboard() {
   const [bookings, setBookings] = useState([])
+  const { currentDoctor } = useUser()
 
-  // تحميل المواعيد من localStorage
   useEffect(() => {
     const savedBookings = JSON.parse(localStorage.getItem('bookings') || '[]')
-    // ترتيب المواعيد من الأحدث للأقدم
     savedBookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     setBookings(savedBookings)
   }, [])
 
-  // تغيير حالة الحجز
+  // دالة تغيير حالة الحجز
   const updateStatus = (id, newStatus) => {
     const updatedBookings = bookings.map(booking => 
       booking.id === id ? { ...booking, status: newStatus } : booking
@@ -21,7 +21,7 @@ function Dashboard() {
     localStorage.setItem('bookings', JSON.stringify(updatedBookings))
   }
 
-  // حذف حجز
+  // دالة حذف حجز
   const deleteBooking = (id) => {
     if (window.confirm('هل أنت متأكد من حذف هذا الحجز؟')) {
       const updatedBookings = bookings.filter(booking => booking.id !== id)
@@ -30,7 +30,32 @@ function Dashboard() {
     }
   }
 
-  // تصنيف الحجوزات
+  // دالة إرسال رسالة واتساب
+  const sendWhatsApp = (booking, messageType) => {
+    // ننظف رقم الهاتف (نشيل المسافات والشرطات)
+    const phone = booking.phone.replace(/[^0-9]/g, '')
+    
+    // تنسيق التاريخ
+    const formattedDate = booking.day.split('-').reverse().join('/')
+    
+    let message = ''
+    
+    if (messageType === 'confirm') {
+      message = `مرحباً ${booking.name}،\n\nتم تأكيد موعدك ✅\n\n📅 التاريخ: ${formattedDate}\n🕐 الوقت: ${booking.time}\n👨‍⚕️ الدكتور: ${currentDoctor?.name || 'العيادة'}\n\nننتظرك في الموعد المحدد. شكراً لثقتكم بنا!`
+    } else if (messageType === 'cancel') {
+      message = `مرحباً ${booking.name}،\n\nنعتذر منك، تم إلغاء موعدك ❌\n\n📅 التاريخ: ${formattedDate}\n🕐 الوقت: ${booking.time}\n\nيرجى التواصل معنا لحجز موعد بديل. شكراً لتفهمك!`
+    } else if (messageType === 'reminder') {
+      message = `مرحباً ${booking.name}،\n\nتذكير بموعدك غداً 📅\n\n🕐 الوقت: ${booking.time}\n👨‍⚕️ الدكتور: ${currentDoctor?.name || 'العيادة'}\n📍 العنوان: ${currentDoctor?.address || 'العيادة'}\n\nننتظرك!`
+    }
+    
+    // إنشاء رابط واتساب
+    const encodedMessage = encodeURIComponent(message)
+    const whatsappURL = `https://wa.me/${phone}?text=${encodedMessage}`
+    
+    // فتح الرابط في نافذة جديدة
+    window.open(whatsappURL, '_blank')
+  }
+
   const confirmedBookings = bookings.filter(b => b.status === 'confirmed')
   const completedBookings = bookings.filter(b => b.status === 'completed')
   const cancelledBookings = bookings.filter(b => b.status === 'cancelled')
@@ -74,6 +99,7 @@ function Dashboard() {
                   <th className="p-3 text-right">الوقت</th>
                   <th className="p-3 text-right">سبب الزيارة</th>
                   <th className="p-3 text-right">الحالة</th>
+                  <th className="p-3 text-right">واتساب</th>
                   <th className="p-3 text-right">إجراءات</th>
                 </tr>
               </thead>
@@ -98,28 +124,57 @@ function Dashboard() {
                       </span>
                     </td>
                     <td className="p-3">
-                      <div className="flex gap-2">
+                      <div className="flex gap-1">
+                        {booking.status === 'confirmed' && (
+                          <button
+                            onClick={() => sendWhatsApp(booking, 'confirm')}
+                            className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
+                            title="إرسال تأكيد"
+                          >
+                            ✅
+                          </button>
+                        )}
+                        {booking.status === 'cancelled' && (
+                          <button
+                            onClick={() => sendWhatsApp(booking, 'cancel')}
+                            className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+                            title="إرسال إلغاء"
+                          >
+                            ❌
+                          </button>
+                        )}
+                        <button
+                          onClick={() => sendWhatsApp(booking, 'reminder')}
+                          className="bg-orange-500 text-white px-2 py-1 rounded text-xs hover:bg-orange-600"
+                          title="تذكير"
+                        >
+                          🔔
+                        </button>
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex gap-1">
                         {booking.status === 'confirmed' && (
                           <>
                             <button
                               onClick={() => updateStatus(booking.id, 'completed')}
-                              className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
+                              className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
                               title="تأكيد الحضور"
                             >
-                              ✅
+                              ✔️
                             </button>
                             <button
                               onClick={() => updateStatus(booking.id, 'cancelled')}
-                              className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+                              className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
                               title="إلغاء"
                             >
-                              ❌
+                              ✖️
                             </button>
                           </>
                         )}
                         <button
                           onClick={() => deleteBooking(booking.id)}
-                          className="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600"
+                          className="bg-gray-500 text-white px-2 py-1 rounded text-xs hover:bg-gray-600"
                           title="حذف"
                         >
                           🗑️
