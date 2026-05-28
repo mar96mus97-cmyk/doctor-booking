@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import { format, parseISO } from 'date-fns'
-import { useUser } from '../context/UserContext'
+import { doctorInfo } from '../data/doctorData'
 
 function Dashboard() {
   const [bookings, setBookings] = useState([])
-  const { currentDoctor } = useUser()
 
   useEffect(() => {
     const savedBookings = JSON.parse(localStorage.getItem('bookings') || '[]')
@@ -30,10 +29,27 @@ function Dashboard() {
     }
   }
 
+  // دالة تجهيز رقم الهاتف بمفتاح البلد
+  const formatPhone = (phone) => {
+    // نشيل كل شي مو رقم
+    let cleanPhone = phone.replace(/[^0-9]/g, '')
+    
+    // إذا بدأ بصفر، نبدله بـ 964
+    if (cleanPhone.startsWith('0')) {
+      cleanPhone = '964' + cleanPhone.slice(1)
+    }
+    
+    // إذا ما بدأ بـ 964، نضيفها
+    if (!cleanPhone.startsWith('964')) {
+      cleanPhone = '964' + cleanPhone
+    }
+    
+    return cleanPhone
+  }
+
   // دالة إرسال رسالة واتساب
   const sendWhatsApp = (booking, messageType) => {
-    // ننظف رقم الهاتف (نشيل المسافات والشرطات)
-    const phone = booking.phone.replace(/[^0-9]/g, '')
+    const phone = formatPhone(booking.phone)
     
     // تنسيق التاريخ
     const formattedDate = booking.day.split('-').reverse().join('/')
@@ -41,11 +57,11 @@ function Dashboard() {
     let message = ''
     
     if (messageType === 'confirm') {
-      message = `مرحباً ${booking.name}،\n\nتم تأكيد موعدك ✅\n\n📅 التاريخ: ${formattedDate}\n🕐 الوقت: ${booking.time}\n👨‍⚕️ الدكتور: ${currentDoctor?.name || 'العيادة'}\n\nننتظرك في الموعد المحدد. شكراً لثقتكم بنا!`
+      message = `مرحباً ${booking.name}،\n\nتم تأكيد موعدك ✅\n\n📅 التاريخ: ${formattedDate}\n🕐 الوقت: ${booking.time}\n👨‍⚕️ الدكتور: ${doctorInfo.name}\n📍 العنوان: ${doctorInfo.address}\n\nننتظرك في الموعد المحدد. شكراً لثقتكم بنا!`
     } else if (messageType === 'cancel') {
-      message = `مرحباً ${booking.name}،\n\nنعتذر منك، تم إلغاء موعدك ❌\n\n📅 التاريخ: ${formattedDate}\n🕐 الوقت: ${booking.time}\n\nيرجى التواصل معنا لحجز موعد بديل. شكراً لتفهمك!`
+      message = `مرحباً ${booking.name}،\n\nنعتذر منك، تم إلغاء موعدك ❌\n\n📅 التاريخ: ${formattedDate}\n🕐 الوقت: ${booking.time}\n👨‍⚕️ الدكتور: ${doctorInfo.name}\n\nيرجى التواصل معنا على الرقم ${doctorInfo.phone} لحجز موعد بديل. شكراً لتفهمك!`
     } else if (messageType === 'reminder') {
-      message = `مرحباً ${booking.name}،\n\nتذكير بموعدك غداً 📅\n\n🕐 الوقت: ${booking.time}\n👨‍⚕️ الدكتور: ${currentDoctor?.name || 'العيادة'}\n📍 العنوان: ${currentDoctor?.address || 'العيادة'}\n\nننتظرك!`
+      message = `مرحباً ${booking.name}،\n\nتذكير بموعدك 📅\n\n📅 التاريخ: ${formattedDate}\n🕐 الوقت: ${booking.time}\n👨‍⚕️ الدكتور: ${doctorInfo.name}\n📍 العنوان: ${doctorInfo.address}\n📞 للتواصل: ${doctorInfo.phone}\n\nننتظرك!`
     }
     
     // إنشاء رابط واتساب
