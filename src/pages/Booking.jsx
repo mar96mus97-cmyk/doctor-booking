@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { doctorInfo } from '../data/doctorData'
 import { format, addDays, isFriday, isSaturday } from 'date-fns'
+import API_URL from '../database/mongodb'
 
 function Booking() {
   const today = new Date()
@@ -14,55 +15,59 @@ function Booking() {
   const [selectedTime, setSelectedTime] = useState(null)
   const [showForm, setShowForm] = useState(false)
   
-  // بيانات نموذج الحجز
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     reason: ''
   })
   
-  // حالة التأكيد
   const [bookingConfirmed, setBookingConfirmed] = useState(false)
 
   const timeSlots = [
-    "4:00 PM","4:30 PM","5:00 PM","5:30PM",
-    "6:00 PM","6:30 PM","7:00 PM","7:30 PM",
-    "8:00 PM","8:30 PM"
+    "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM",
+    "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM",
+    "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM",
+    "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM"
   ]
 
-  // دالة اختيار الوقت
   const handleTimeSelect = (time) => {
     setSelectedTime(time)
     setShowForm(true)
   }
 
-  // دالة تحديث بيانات النموذج
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  // دالة تأكيد الحجز
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
-    // تخزين الحجز في localStorage
-    const bookings = JSON.parse(localStorage.getItem('bookings') || '[]')
-    const newBooking = {
-      id: Date.now(),
-      day: format(selectedDay, 'yyyy-MM-dd'),
-      time: selectedTime,
-      ...formData,
-      status: 'confirmed',
-      createdAt: new Date().toISOString()
+    try {
+      const response = await fetch(`${API_URL}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientName: formData.name,
+          patientPhone: formData.phone,
+          bookingDate: format(selectedDay, 'yyyy-MM-dd'),
+          bookingTime: selectedTime,
+          reason: formData.reason,
+          status: 'confirmed'
+        })
+      })
+      
+      if (response.ok) {
+        setBookingConfirmed(true)
+      } else {
+        alert('حدث خطأ في الحجز')
+      }
+    } catch (error) {
+      console.error('خطأ:', error)
+      alert('حدث خطأ في الاتصال بالسيرفر')
     }
-    bookings.push(newBooking)
-    localStorage.setItem('bookings', JSON.stringify(bookings))
-    
-    setBookingConfirmed(true)
   }
 
-  // دالة حجز موعد جديد
   const handleNewBooking = () => {
     setSelectedDay(null)
     setSelectedTime(null)
@@ -73,7 +78,6 @@ function Booking() {
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      {/* معلومات الدكتور */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6 text-right">
         <h2 className="text-3xl font-bold text-blue-600 mb-4">{doctorInfo.name}</h2>
         <p className="text-lg text-gray-600">🏥 {doctorInfo.specialty}</p>
@@ -82,7 +86,6 @@ function Booking() {
         <p className="text-lg text-gray-600">🕐 مواعيد العمل: {doctorInfo.workingHours}</p>
       </div>
 
-      {/* رسالة تأكيد الحجز */}
       {bookingConfirmed && (
         <div className="bg-green-50 border-2 border-green-500 rounded-lg p-6 mb-6 text-center">
           <div className="text-6xl mb-4">✅</div>
@@ -102,7 +105,6 @@ function Booking() {
         </div>
       )}
 
-      {/* اختيار اليوم */}
       {!bookingConfirmed && (
         <>
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -129,7 +131,6 @@ function Booking() {
             </div>
           </div>
 
-          {/* اختيار الوقت */}
           {selectedDay && (
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
               <h3 className="text-2xl font-bold text-right mb-4">
@@ -153,51 +154,27 @@ function Booking() {
             </div>
           )}
 
-          {/* نموذج الحجز */}
           {showForm && selectedTime && (
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-2xl font-bold text-right mb-4">إكمال بيانات الحجز:</h3>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-right text-gray-700 mb-2">الاسم الكامل:</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full p-3 border rounded-lg text-right"
-                    placeholder="أدخل اسمك الكامل"
-                  />
+                  <input type="text" name="name" value={formData.name} onChange={handleInputChange} required
+                    className="w-full p-3 border rounded-lg text-right" placeholder="أدخل اسمك الكامل" />
                 </div>
                 <div>
                   <label className="block text-right text-gray-700 mb-2">رقم الهاتف:</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full p-3 border rounded-lg text-right"
-                    placeholder="0770 000 0000"
-                  />
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} required
+                    className="w-full p-3 border rounded-lg text-right" placeholder="0770 000 0000" />
                 </div>
                 <div>
                   <label className="block text-right text-gray-700 mb-2">سبب الزيارة:</label>
-                  <textarea
-                    name="reason"
-                    value={formData.reason}
-                    onChange={handleInputChange}
-                    required
-                    rows="3"
-                    className="w-full p-3 border rounded-lg text-right"
-                    placeholder="اذكر سبب الزيارة باختصار"
-                  />
+                  <textarea name="reason" value={formData.reason} onChange={handleInputChange} required rows="3"
+                    className="w-full p-3 border rounded-lg text-right" placeholder="اذكر سبب الزيارة باختصار" />
                 </div>
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition text-xl font-bold"
-                >
+                <button type="submit"
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition text-xl font-bold">
                   تأكيد الحجز ✅
                 </button>
               </form>
